@@ -89,11 +89,11 @@ void JNI_OnUnload(JavaVM* jvm, void* reserved) {
     numConstantClasses = 0;
 }
 
-void findAndThrow(JNIEnv* env, char* className, char* message) {
-    jclass class = (*env)->FindClass(env, className);
-    if (class == NULL) return; // JVM is expected to throw an error when a class isn't found
-    (*env)->ThrowNew(env, class, message);
-}
+// We have to do this for some reason
+
+extern inline void findAndThrow(JNIEnv* env, char* className, char* message);
+
+extern inline void throw(JNIEnv* env, jclass class, char* message);
 
 void throwf(JNIEnv* env, jclass class, char* format, ...) {
     va_list args;

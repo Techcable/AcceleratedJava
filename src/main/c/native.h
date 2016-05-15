@@ -29,7 +29,11 @@ extern jclass UNSUPPORTED_OPERATION_EXCEPTION;
 
 // Helper functions
 
-void findAndThrow(JNIEnv*, char*, char*);
+inline void findAndThrow(JNIEnv* env, char* className, char* message) {
+    jclass class = (*env)->FindClass(env, className);
+    if (class == NULL) return; // JVM is expected to throw an error when a class isn't found
+    (*env)->ThrowNew(env, class, message);
+}
 
 inline void throw(JNIEnv* env, jclass class, char* message) {
     (*env)->ThrowNew(env, class, message);

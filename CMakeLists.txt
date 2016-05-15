@@ -1,55 +1,24 @@
 cmake_minimum_required(VERSION 3.5)
 project(AcceleratedJava)
-include(FindJNI)
-
-
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set(SYSTEM linux)
-elseif (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    set(SYSTEM windows)
-elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    set(SYSTEM osx)
+if (NOT CMAKE_CROSSCOMPILING)
+    include(FindJNI)
 else ()
-    message(FATAL_ERROR "Unknown system ${CMAKE_SYSTEM_NAME}")
-endif ()
-
-# Determine architecture
-if (WIN32)
-    execute_process(COMMAND wmic os get osarchitecture OUTPUT_VARIABLE RAW_ARCH OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if ("${RAW_ARCH}" STREQUAL "64-bit")
-        set(ARCH "x86_64")
-    elseif ("${RAW_ARCH}" STREQUAL "32-bit")
-        set(ARCH "x86")
-    else ()
-        message(FATAL_ERROR "Unknown architecture ${RAW_ARCH}")
-    endif ()
-elseif (UNIX)
-    # Future hint: Whitespace (including newlines!) is considered in string equality
-    execute_process(COMMAND uname -m OUTPUT_VARIABLE RAW_ARCH OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if (RAW_ARCH STREQUAL "x86_64")
-        set(ARCH "x86_64")
-    elseif (RAW_ARCH STREQUAL "i686" OR RAW_ARCH STREQUAL "i386")
-        set(ARCH "x86")
-    else ()
-        message(FATAL_ERROR "Unknown architecture ${RAW_ARCH}")
-    endif ()
-else ()
-    message(FATAL_ERROR Unable to determine architecture for system ${CMAKE_SYSTEM_NAME})
-endif ()
-
-if (ARCH STREQUAL "x86_64")
-    set(SYSTEM_ID "${SYSTEM}_64")
-elseif (ARCH STREQUAL "x86")
-    set(SYSTEM_ID "${SYSTEM}_32")
-else ()
-    message(FATAL_ERROR "Unable to determine system id for (known) architecture ${ARCH}")
+    if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        message(FATAL_ERROR "Can't crosscompile to ${CMAKE_SYSTEM_NAME}, since we don't have the jni headers for it!")
+    endif()
+    # WTF do we outut 'libacceleratedJava.dll'?
+    set(CMAKE_SHARED_MODULE_PREFIX "")
+    # We have the windows jni include files in the project
+    set(JNI_INCLUDE_DIRS "includes/jni/;includes/jni/win32")
+    set(JNI_FOUND TRUE)
 endif ()
 
 if (NOT JNI_FOUND)
     message(FATAL_ERROR JNI not found)
 endif ()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -std=c11 -pedantic")
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic")
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "natives")
 
