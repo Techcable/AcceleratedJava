@@ -28,17 +28,6 @@ public final class NativeLibrary {
         });
     }
 
-    public boolean tryLoad(File nativesDirectory) {
-        if (!loaded) {
-            try {
-                load(nativesDirectory);
-            } catch (UnsatisfiedLinkError e) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     @Synchronized
     public void load(File nativesDirectory) {
         checkNotNull(nativesDirectory, "Null natives directory.");

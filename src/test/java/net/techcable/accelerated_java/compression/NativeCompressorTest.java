@@ -6,6 +6,7 @@ import net.techcable.accelerated_java.InvalidDataException;
 import net.techcable.accelerated_java.jni.Native;
 
 import org.junit.Assume;
+import org.junit.AssumptionViolatedException;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -15,8 +16,16 @@ public class NativeCompressorTest extends AbstractCompressorTest {
     @BeforeClass
     public static void loadNative() {
         File nativesDirectory = new File("natives");
-        Assume.assumeTrue(nativesDirectory.exists());
-        Native.LIBRARY.tryLoad(nativesDirectory);
+        if (!nativesDirectory.exists()) {
+            System.err.println("Natives directory doesn't exist");
+            throw new AssumptionViolatedException("Natives directory doesn't exist");
+        }
+        try {
+            Native.LIBRARY.load(nativesDirectory);
+        } catch (Throwable t) {
+            System.err.println("(Non-Fatal) Unable to load native library");
+            t.printStackTrace();
+        }
         Assume.assumeTrue(Native.LIBRARY.isLoaded());
     }
 
